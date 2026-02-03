@@ -3,8 +3,8 @@
 #include <stdlib.h>
 
 struct arg{
-	int* a;
-	int* b;
+	volatile int* a;
+	volatile int* b;
 };
 
 struct res{
@@ -13,23 +13,14 @@ struct res{
 };
 
 void *thread_a(void* ptr){
-	volatile struct arg* arg=ptr;
-	struct res* res=malloc(sizeof(struct res));
+       	struct arg* arg=ptr;
 	*(arg->a)=*(arg->a)+1;
 	*(arg->b)=*(arg->b)-1;
-	res->a=arg->a;
-	res->b=arg->b;
-	return res;
 }
-
 void *thread_b(void* ptr){
-	volatile struct arg* arg=ptr;
-	struct res* res=malloc(sizeof(struct res));
+	struct arg* arg=ptr;
 	*(arg->a)=*(arg->a)-1;
 	*(arg->b)=*(arg->b)+1;
-	res->a=arg->a;
-	res->b=arg->b;
-	return res;
 }
 
 int main(){
@@ -48,12 +39,10 @@ int main(){
 	pthread_create(&thr_a,NULL,thread_a,arg1);
 	pthread_create(&thr_b,NULL,thread_b,&arg2);
 
-	void *tmp;
-	pthread_join(thr_a,&tmp);
-	res=tmp;
-	printf("%d %d\n",*(res->a),*(res->b));
-	pthread_join(thr_b,&tmp);
-	res=tmp;	
-	printf("%d %d\n",*(res->a),*(res->b));
+	pthread_join(thr_a,NULL);
+	pthread_join(thr_b,NULL);
+
+	printf("%d %d\n",*(arg1->a),*(arg1->b));
+	printf("%d %d\n",*(arg2.a),*(arg2.b));
 	free(res);
 }

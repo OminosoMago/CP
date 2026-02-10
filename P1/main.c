@@ -23,9 +23,15 @@ void *thread_b(void* ptr){
 	*(arg->b)=*(arg->b)+1;
 }
 
+void *thread_mon(void* ptr){
+	struct arg* arg=ptr;
+	printf("%d %d",*(arg->a),*(arg->b));
+}
+
 int main(){
 	pthread_t thr_b;
 	pthread_t thr_a;
+	pthread_t thr_mon;
 	struct arg* arg1=malloc(sizeof(struct arg));
 	arg1->a=malloc(sizeof(int));
 	arg1->b=malloc(sizeof(int));
@@ -36,9 +42,12 @@ int main(){
 		arg1->b
 	};
 	struct res* res;
-	pthread_create(&thr_a,NULL,thread_a,arg1);
-	pthread_create(&thr_b,NULL,thread_b,&arg2);
-
+	for(int i=0;i<5;i++){
+		pthread_create(&thr_mon,NULL,thread_mon,arg1);
+		pthread_create(&thr_a,NULL,thread_a,arg1);
+		pthread_create(&thr_b,NULL,thread_b,&arg2);
+		pthread_create(&thr_mon,NULL,thread_mon,arg1);
+	}
 	pthread_join(thr_a,NULL);
 	pthread_join(thr_b,NULL);
 

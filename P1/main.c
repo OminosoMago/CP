@@ -13,7 +13,7 @@ struct res{
 };
 
 void *thread_a(void* ptr){
-       	struct arg* arg=ptr;
+	struct arg* arg=ptr;
 	*(arg->a)=*(arg->a)+1;
 	*(arg->b)=*(arg->b)-1;
 }
@@ -25,7 +25,7 @@ void *thread_b(void* ptr){
 
 void *thread_mon(void* ptr){
 	struct arg* arg=ptr;
-	printf("%d %d",*(arg->a),*(arg->b));
+	printf("%d %d %d\n",*(arg->a),*(arg->b),*(arg->a)+*(arg->b));
 }
 
 int main(){
@@ -46,7 +46,6 @@ int main(){
 		pthread_create(&thr_mon,NULL,thread_mon,arg1);
 		pthread_create(&thr_a,NULL,thread_a,arg1);
 		pthread_create(&thr_b,NULL,thread_b,&arg2);
-		pthread_create(&thr_mon,NULL,thread_mon,arg1);
 	}
 	pthread_join(thr_a,NULL);
 	pthread_join(thr_b,NULL);

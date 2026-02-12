@@ -12,5 +12,5 @@ clean:
 run:main
 	./main
 valgrind: main
-	valgrind --leak-check=full ./main
+	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./main
 

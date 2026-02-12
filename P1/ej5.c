@@ -5,7 +5,7 @@
 #include <time.h>
 
 #define I 6
-#define WAIT_N 1000
+#define WAIT_N 1000000
 
 volatile int mon_sig=1;
 
@@ -32,35 +32,62 @@ pthread_mutex_t *sel(pthread_mutex_t *a,pthread_mutex_t *b){
 
 void *thread_a(void* ptr){
        	struct arg* arg=ptr;
-
+	pthread_mutex_t *pri=sel(arg->a->mutex,arg->b->mutex);
+	pthread_mutex_t *sec;
+	if(pri==arg->a->mutex){
+		sec=arg->b->mutex;
+	}
+	else{
+		sec=arg->a->mutex;
+	}
 	for(int i=0;i<I;i++){
-		pthread_mutex_lock(arg->a->mutex);
+		pthread_mutex_lock(pri);
+		pthread_mutex_lock(sec);
 		*(arg->a->n)=*(arg->a->n)+1;
 		*(arg->b->n)=*(arg->b->n)-1;
-		pthread_mutex_unlock(arg->a->mutex);
+		pthread_mutex_unlock(pri);
+		pthread_mutex_unlock(sec);
 		esperar_ns(WAIT_N);
 	}
 }
 
 void *thread_b(void* ptr){
 	struct arg* arg=ptr;
-
+	pthread_mutex_t *pri=sel(arg->a->mutex,arg->b->mutex);
+	pthread_mutex_t *sec;
+	if(pri==arg->a->mutex){
+		sec=arg->b->mutex;
+	}
+	else{
+		sec=arg->a->mutex;
+	}
 	for(int i=0;i<I;i++){
-		pthread_mutex_lock(arg->a->mutex);
+		pthread_mutex_lock(pri);
+		pthread_mutex_lock(sec);
 		*(arg->a->n)=*(arg->a->n)-1;
 		*(arg->b->n)=*(arg->b->n)+1;
-		pthread_mutex_unlock(arg->a->mutex);
+		pthread_mutex_unlock(pri);
+		pthread_mutex_unlock(sec);
 		esperar_ns(WAIT_N);
 	}
 }
 
 void *thread_mon(void* ptr){
 	struct arg* arg=ptr;
-
+	pthread_mutex_t *pri=sel(arg->a->mutex,arg->b->mutex);
+	pthread_mutex_t *sec;
+	if(pri==arg->a->mutex){
+		sec=arg->b->mutex;
+	}
+	else{
+		sec=arg->a->mutex;
+	}
 	while(mon_sig){	
-		pthread_mutex_lock(arg->a->mutex);
+		pthread_mutex_lock(pri);
+		pthread_mutex_lock(sec);
 		printf("%d %d %d\n",*(arg->a->n),*(arg->b->n),*(arg->b->n)+*(arg->a->n));
-		pthread_mutex_unlock(arg->a->mutex);
+		pthread_mutex_unlock(pri);
+		pthread_mutex_unlock(sec);
 		esperar_ns(WAIT_N);
 	}
 }
@@ -84,7 +111,11 @@ void inicializar_data(
 	estructura->a->mutex=mut1;
 	estructura->b->mutex=mut2;
 }
-
+void iniciar_vector(struct arg* v[],struct arg* elem,int n){
+	for(int i=0;i<n;i++){
+		v[i]=elem;
+	}
+}
 void borrar_data(struct arg* estructura){
 	free((void *)estructura->a->n);
 	free((void *)estructura->b->n);
@@ -96,12 +127,14 @@ int main(){
 	pthread_t thr_a;
 	pthread_t thr_mon;
 	
-	pthread_mutex_t *mut=malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_t *mut1=malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_t *mut2=malloc(sizeof(pthread_mutex_t));
 
-	crear_mutex(&mut);
+	crear_mutex(&mut1);
+	crear_mutex(&mut2);
 
 	struct arg* arg1=malloc(sizeof(struct arg));
-	inicializar_data(arg1,mut,mut);//no voy a comentar esto(hice primero con dos mutex)
+	inicializar_data(arg1,mut1,mut2);
 
 	struct arg arg2={
 		arg1->a,
@@ -119,6 +152,8 @@ int main(){
 	borrar_data(arg1);
 	free(arg1);
 
-	borrar_mutex(&mut);
-	free(mut);
+	borrar_mutex(&mut1);
+	borrar_mutex(&mut2);
+	free(mut1);
+	free(mut2);	
 }

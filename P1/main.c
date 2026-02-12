@@ -56,7 +56,7 @@ void *thread_b(void* ptr){
 
 void *thread_mon(void* ptr){
 	struct arg* arg=ptr;
-
+	
 	while(mon_sig){	
 		pthread_mutex_lock(arg->a->mutex);
 		printf("%d %d %d\n",*(arg->a->n),*(arg->b->n),*(arg->b->n)+*(arg->a->n));
@@ -101,7 +101,7 @@ int main(){
 	crear_mutex(&mut);
 
 	struct arg* arg1=malloc(sizeof(struct arg));
-	inicializar_data(arg1,mut,mut);//no voy a comentar esto(hice primero con dos mutex)
+	inicializar_data(arg1,mut,mut);//non vou a comentar isto(fixemos primeiro con dous mutex)
 
 	struct arg arg2={
 		arg1->a,
@@ -111,6 +111,7 @@ int main(){
 	pthread_create(&thr_mon,NULL,thread_mon,arg1);
 	pthread_create(&thr_a,NULL,thread_a,arg1);
 	pthread_create(&thr_b,NULL,thread_b,&arg2);
+
 	pthread_join(thr_a,NULL);
 	pthread_join(thr_b,NULL);
 	mon_sig=0;

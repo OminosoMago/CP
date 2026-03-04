@@ -51,7 +51,7 @@ int rec_mutex_trylock(rec_mutex_t *m) {
     pthread_t actual = pthread_self();
 
 	if (pthread_mutex_trylock(&m->mutex) != 0) {
-        return -1; // Mutex is already locked by another thread
+        return -1;
     }
 	if (m->owner_thread == actual || m->rec_count == 0) {
         if(m->rec_count == 0) {
@@ -59,8 +59,8 @@ int rec_mutex_trylock(rec_mutex_t *m) {
         }
 		m->rec_count++;
         pthread_mutex_unlock(&m->mutex);
-        return 0; // Successfully acquired the lock
+        return 0;
 	}
 	pthread_mutex_unlock(&m->mutex);
-	return -1; // Mutex is already locked by another thread
+	return -1; 
 };

@@ -2,7 +2,14 @@
 #define __PRIO_MUTEX_H__
 
 
-typedef struct prio_mutex_t prio_mutex_t;
+typedef struct prio_mutex_t{
+	pthread_mutex_t *mutex;
+	pthread_mutex_t *vector;
+	pthread_cond_t *cond;
+	int n_prios;
+	int locked;
+	int *prio_q;
+}prio_mutex_t;
 
 int prio_mutex_init(prio_mutex_t *m, int num_prios);
 int prio_mutex_destroy(prio_mutex_t *m);

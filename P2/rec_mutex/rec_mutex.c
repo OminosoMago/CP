@@ -1,10 +1,6 @@
 #include <pthread.h>
 
-struct rec_mutex_t {
-	pthread_mutex_t mutex;
-	pthread_t owner_thread;
-	int rec_count;
-};
+
 
 #include "rec_mutex.h"
 

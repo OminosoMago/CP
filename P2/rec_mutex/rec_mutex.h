@@ -1,8 +1,12 @@
 #ifndef __REC_MUTEX_H__
 #define __REC_MUTEX_H__
+#include <pthread.h>
 
-
-typedef struct rec_mutex_t rec_mutex_t;
+typedef struct rec_mutex_t {
+	pthread_mutex_t mutex;
+	pthread_t owner_thread;
+	int rec_count;
+} rec_mutex_t;
 
 int rec_mutex_init(rec_mutex_t *m);
 int rec_mutex_destroy(rec_mutex_t *m);

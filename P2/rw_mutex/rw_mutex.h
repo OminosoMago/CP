@@ -1,6 +1,7 @@
 #ifndef __RW_MUTEX_H__
 #define __RW_MUTEX_H__
 
+#include <pthread.h>
 
 typedef 
 struct rw_mutex_t {

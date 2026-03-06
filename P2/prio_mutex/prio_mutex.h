@@ -1,6 +1,7 @@
 #ifndef __PRIO_MUTEX_H__
 #define __PRIO_MUTEX_H__
 
+#include <pthread.h>
 
 typedef struct prio_mutex_t{
 	pthread_mutex_t *mutex;

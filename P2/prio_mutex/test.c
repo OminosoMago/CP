@@ -15,7 +15,9 @@ void * f_prueba(void *ptr){
 	printf("prioridad:%d\n",arg->prio);
 	usleep(5000);
 	prio_mutex_unlock(arg->m);
+	return NULL;
 }
+
 int main(){
 	prio_mutex_t *m=malloc(sizeof(prio_mutex_t));
 	int n_prio=10;

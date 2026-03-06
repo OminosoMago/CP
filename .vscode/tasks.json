@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "all P2",
+      "type": "shell",
+      "command": "make",
+      "options": {
+        "cwd": "${workspaceFolder}/P2/sem"
+      },
+      "group": "build",
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

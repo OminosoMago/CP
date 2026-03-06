@@ -1,6 +1,8 @@
 #ifndef __SEM_H__
 #define __SEM_H__
 
+#include <pthread.h>
+
 typedef struct sem_t {
 	int cont;
 	pthread_mutex_t *sem;

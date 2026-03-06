@@ -68,10 +68,6 @@ int main(){
 		pthread_create(&writers[i],NULL,f_prueba_writer,arg_w[i]);
 	}
 
-	//Espera a que casi todos los writers acaben
-	for(int i=0; i<N_WRITERS/2;i++){
-		pthread_join(writers[i],NULL);
-	}
 	//Llama a los readers restantes
 	for(int i=N_READERS/2; i<N_READERS;i++){
 		pthread_create(&readers[i],NULL,f_prueba_reader,arg_r[i]);
@@ -83,7 +79,7 @@ int main(){
 	}
 
 	//Espera por los writers restantes
-	for(int i=N_WRITERS/2; i<N_WRITERS;i++){
+	for(int i=0; i<N_WRITERS;i++){
 		pthread_join(writers[i],NULL);
 	}
 

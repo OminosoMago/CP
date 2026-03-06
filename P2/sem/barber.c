@@ -16,5 +16,7 @@ int main (int argc, char **argv)
 
     read_options(argc, argv, &opt);
 
+    printf("barbers:%d\ncustomers:%d\ncut_time5%d\n ",opt.barbers,opt.customers,opt.cut_time);
+
     exit (0);
 }

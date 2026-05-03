@@ -49,9 +49,8 @@ int main(int argc, char *argv[]) {
     int *data1 = NULL, *data2 = NULL;
     int *local_data1, *local_data2;
     int *result = NULL, *local_result;
-
-    struct timeval tv_comp_start, tv_comp_end;
-    struct timeval tv_comm_start, tv_comm_end;
+    double t_scatter;
+    struct timeval tv_start, tv_end;
     double t_comp, t_comm;
 
     MPI_Init(&argc, &argv);
@@ -106,23 +105,25 @@ int main(int argc, char *argv[]) {
 
     // ---- Communication: scatter ----
     MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == 0) gettimeofday(&tv_comm_start, NULL);
+
+
+    gettimeofday(&tv_start, NULL);
 
     MPI_Scatterv(data1, sendcounts_data, displs_data, MPI_INT,
                  local_data1, local_rows * N, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Scatterv(data2, sendcounts_data, displs_data, MPI_INT,
                  local_data2, local_rows * N, MPI_INT, 0, MPI_COMM_WORLD);
 
+    gettimeofday(&tv_end, NULL);
+
+    t_scatter = (tv_end.tv_usec - tv_start.tv_usec) / 1e6
+    + (tv_end.tv_sec  - tv_start.tv_sec);
+
     MPI_Barrier(MPI_COMM_WORLD);
-    double t_scatter;
-    {
-        struct timeval tv_tmp;
-        gettimeofday(&tv_tmp, NULL);
-        // Each process records scatter end time; we compute per-process scatter time below
-    }
+
 
     // ---- Computation ----
-    gettimeofday(&tv_comp_start, NULL);
+    gettimeofday(&tv_start, NULL);
 
     for (i = 0; i < local_rows; i++) {
         local_result[i] = 0;
@@ -132,20 +133,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    gettimeofday(&tv_comp_end, NULL);
-    t_comp = (tv_comp_end.tv_usec - tv_comp_start.tv_usec) / 1e6
-    + (tv_comp_end.tv_sec  - tv_comp_start.tv_sec);
+    gettimeofday(&tv_end, NULL);
+    t_comp = (tv_end.tv_usec - tv_start.tv_usec) / 1e6
+    + (tv_end.tv_sec  - tv_start.tv_sec);
 
     // ---- Communication: gather ----
-    struct timeval tv_gather_start, tv_gather_end;
-    gettimeofday(&tv_gather_start, NULL);
+    gettimeofday(&tv_start, NULL);
 
     MPI_Gatherv(local_result, local_rows, MPI_INT,
                 result, sendcounts_res, displs_res, MPI_INT, 0, MPI_COMM_WORLD);
 
-    gettimeofday(&tv_gather_end, NULL);
-    t_comm = (tv_gather_end.tv_usec - tv_gather_start.tv_usec) / 1e6
-    + (tv_gather_end.tv_sec  - tv_gather_start.tv_sec);
+    gettimeofday(&tv_end, NULL);
+    t_comm = (tv_end.tv_usec - tv_start.tv_usec) / 1e6
+    + (tv_end.tv_sec  - tv_start.tv_sec)+t_scatter;
 
     // ---- Print per-process times ----
     // Collect all times to rank 0 and print in order

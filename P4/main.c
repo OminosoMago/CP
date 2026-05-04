@@ -163,13 +163,14 @@ int main(int argc, char *argv[]) {
                    p, all_comp[p], all_comm[p]);
         }
 
-        #if DEBUG == 1
-        long long checksum = 0;
-        for (i = 0; i < M; i++) checksum += result[i];
-        printf("Checksum: %lld\n", checksum);
-        #elif DEBUG == 2
-        for (i = 0; i < M; i++) printf(" %d \t ", result[i]);
-        #endif
+        if (DEBUG == 1){
+            long long checksum = 0;
+            for (i = 0; i < M; i++) checksum += result[i];
+            printf("Checksum: %lld\n", checksum);
+        }
+        else if (DEBUG == 2){
+            for (i = 0; i < M; i++) printf(" %d \t ", result[i]);
+        }
 
         free(all_comp); free(all_comm);
         free(data1); free(data2); free(result);

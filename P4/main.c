@@ -57,18 +57,15 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // Compute local rows: handle case where M is not divisible by size
     int base_rows = M / size;
-    int remainder  = M % size;
+    int remainder = M % size;
 
-    // Each process gets base_rows rows, plus one extra if rank < remainder
     int local_rows = base_rows + (rank < remainder ? 1 : 0);
 
-    // Displacement and count arrays for Scatterv / Gatherv
     int *sendcounts_data = NULL;
-    int *displs_data     = NULL;
-    int *sendcounts_res  = NULL;
-    int *displs_res      = NULL;
+    int *displs_data = NULL;
+    int *sendcounts_res = NULL;
+    int *displs_res = NULL;
 
     if (rank == 0) {
         sendcounts_data = (int *) malloc(size * sizeof(int));
@@ -80,13 +77,12 @@ int main(int argc, char *argv[]) {
         for (int p = 0; p < size; p++) {
             int rows_p = base_rows + (p < remainder ? 1 : 0);
             sendcounts_data[p] = rows_p * N;
-            displs_data[p]     = offset * N;
-            sendcounts_res[p]  = rows_p;
-            displs_res[p]      = offset;
+            displs_data[p] = offset * N;
+            sendcounts_res[p] = rows_p;
+            displs_res[p] = offset;
             offset += rows_p;
         }
 
-        // Allocate and initialise full matrices on rank 0
         data1  = (int *) malloc((long)M * N * sizeof(int));
         data2  = (int *) malloc((long)M * N * sizeof(int));
         result = (int *) malloc(M * sizeof(int));
@@ -98,12 +94,10 @@ int main(int argc, char *argv[]) {
             }
     }
 
-    // Allocate local buffers
-    local_data1  = (int *) malloc((long)local_rows * N * sizeof(int));
-    local_data2  = (int *) malloc((long)local_rows * N * sizeof(int));
+    local_data1 = (int *) malloc((long)local_rows * N * sizeof(int));
+    local_data2 = (int *) malloc((long)local_rows * N * sizeof(int));
     local_result = (int *) malloc(local_rows * sizeof(int));
 
-    // ---- Communication: scatter ----
     MPI_Barrier(MPI_COMM_WORLD);
 
 
@@ -122,7 +116,6 @@ int main(int argc, char *argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-    // ---- Computation ----
     gettimeofday(&tv_start, NULL);
 
     for (i = 0; i < local_rows; i++) {
@@ -137,7 +130,6 @@ int main(int argc, char *argv[]) {
     t_comp = (tv_end.tv_usec - tv_start.tv_usec) / 1e6
     + (tv_end.tv_sec  - tv_start.tv_sec);
 
-    // ---- Communication: gather ----
     gettimeofday(&tv_start, NULL);
 
     MPI_Gatherv(local_result, local_rows, MPI_INT,
@@ -147,8 +139,7 @@ int main(int argc, char *argv[]) {
     t_comm = (tv_end.tv_usec - tv_start.tv_usec) / 1e6
     + (tv_end.tv_sec  - tv_start.tv_sec)+t_scatter;
 
-    // ---- Print per-process times ----
-    // Collect all times to rank 0 and print in order
+
     double *all_comp = NULL, *all_comm = NULL;
     if (rank == 0) {
         all_comp = (double *) malloc(size * sizeof(double));
